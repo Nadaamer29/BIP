@@ -6,6 +6,6 @@ using System.Threading.Tasks;
 
 namespace BIP.DataAccess.Dtos.User
 {
-     public record RegisterRequestdto(string Email, string Password);
+     public record RegisterRequestdto(string Email, string Password,string UserName);
 
 }

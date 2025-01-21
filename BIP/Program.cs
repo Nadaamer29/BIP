@@ -12,14 +12,24 @@ using Mapster;
 using MapsterMapper;
 using BIP.DataAccess.Interfaces.User;
 using BIP.BuisnessLogic.Services;
-
+using System.Reflection;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using BIP.BuisnessLogic;
+using BIP.Core;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
  // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
-builder.Services.AddControllers();
+//builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddFluentValidation(fv =>
+    {
+        fv.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+    });
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -58,7 +68,7 @@ builder.Services.AddOptions<JWT>().BindConfiguration("JWT")
 //builder.Services.AddIdentity<ApplicationUser, Role>()
 //    .AddEntityFrameworkStores<ApplicationDbContext>()
 //    .AddDefaultTokenProviders();
-builder.Services.Configure<IdentityOptions>(options =>   // register identity
+builder.Services.Configure<IdentityOptions>(options =>   
 {
     options.Password.RequiredLength = 8;
     options.SignIn.RequireConfirmedEmail = true;
@@ -82,13 +92,10 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["JWT:Audience"]
     };
 });
-builder.Services.AddScoped<IUserRepository, UserRepository>();   // services injection
-
+builder.Services.AddServiceDependendcies().AddCoreDependencies();
+//builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+//builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddMapster();
-
-
-// Register Global Exception Middleware
-
 
 var app = builder.Build();
 

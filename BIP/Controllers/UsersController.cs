@@ -1,60 +1,89 @@
-﻿using BIP.DataAccess.Dtos.User;
-using BIP.DataAccess.Interfaces.User;
-using BIP.DataAccess.Response;
-using BIP.Entities;
+﻿using BIP.Base;
+using BIP.DataAccess.Dtos.User;
+using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace BIP.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UsersController : ControllerBase
+    public class ApplicationUserController : AppControllerBase
     {
-        private readonly IUserRepository _userService;
+      //  private readonly IMediator _mediator;
 
-        public UsersController(IUserRepository userService)
+        public ApplicationUserController()
         {
-            _userService = userService;
+           // _mediator = mediator;
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterAsync([FromBody] RegisterRequestdto request, CancellationToken cancellationToken)
+        public async Task<IActionResult> RegisterAsync([FromBody] RegisterUserCommand command, CancellationToken cancellationToken)
+        {
+            if (command == null)
+            {
+                return BadRequest(new { Message = "Command is null" });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var invalidResponse = new
+                {
+                    Succeeded = false,
+                    Message = "Invalid data",
+                    Errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage))
+                };
+                return BadRequest(invalidResponse);
+            }
+
+            var response = await Mediator.Send(command, cancellationToken);
+
+            if (response.Succeeded)
+            {
+                return StatusCode(StatusCodes.Status201Created, response);
+            }
+            else
+            {
+                return BadRequest(response);
+            }
+        }
+
+
+        [HttpPost("login")]
+        public async Task<IActionResult> LoginAsync([FromBody] LoginUserCommand command, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(new { Message = "Invalid data" });
             }
 
-            var response = await _userService.RegisterAsync(request, cancellationToken);
+            var response = await Mediator.Send(command, cancellationToken);
 
             if (response.Succeeded)
             {
-                return StatusCode(StatusCodes.Status201Created, response); 
+                return Ok(response);
             }
             else
             {
-                return BadRequest(response); 
+                return BadRequest(response);
             }
         }
-    }
 
-
-        //[HttpPost("register")]
-        //public async Task<IActionResult> Register([FromBody] RegisterModel model)
-        //{
-        //    var user = new ApplicationUser { UserName = model.IdentityNumber, Email = model.Email };
-        //    var result = await _userManager.CreateAsync(user, model.Password);
-
-        //    if (result.Succeeded)
+        //    [HttpGet("{id}")]
+        //    public async Task<IActionResult> GetUserByIdAsync(string id)
         //    {
-        //        var roles = model.Roles ?? new string[] { };
-        //        await _userManager.AddToRolesAsync(user, roles);
+        //        var response = await _mediator.Send(new GetUserByIdCommand { UserId = id });
 
-        //        return Ok(_responseHandler.Created(user));
+        //        if (response.Succeeded)
+        //        {
+        //            return Ok(response);
+        //        }
+
+        //        return StatusCode(response.StatusCode, response);
         //    }
-
-        //    return BadRequest(_responseHandler.BadRequest(result.Errors.Select(e => e.Description).ToList()));
         //}
     }
+}

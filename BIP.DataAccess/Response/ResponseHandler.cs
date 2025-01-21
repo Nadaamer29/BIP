@@ -17,10 +17,9 @@ namespace BIP.DataAccess.Response
                 StatusCode = (int)System.Net.HttpStatusCode.OK,
                 Succeeded = true,
                 Message = "Request Successful",
-                Meta = meta
+                Meta = meta ?? new object()  
             };
         }
-
         public Response<T> BadRequest<T>(string message = null)
         {
             return new Response<T>()

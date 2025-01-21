@@ -15,8 +15,9 @@ namespace BIP.DataAccess.Mapping
         public void Register(TypeAdapterConfig config)
         {
             config.NewConfig<RegisterRequestdto, ApplicationUser>()
-                .Map(dest => dest.UserName, src => src.Email);
-          
+          .Map(dest => dest.UserName, src => src.UserName)
+                          .Map(dest => dest.Email, src => src.Email); 
+
         }
     }
 }

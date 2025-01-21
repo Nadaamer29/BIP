@@ -13,7 +13,12 @@ namespace BIP.DataAccess.Interfaces.User
     {
         Task<Response<AuthResponse>> RegisterAsync(RegisterRequestdto request, CancellationToken cancellationToken);
 
-      //  Task<Response<AuthResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken);
+        Task<Response<AuthResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken);
+        Task<Response<GetUserResponseDto>> GetUserByIdAsync(string userId);
+
+
+        //        Task<Response<string>> LogoutAsync(string userId, CancellationToken cancellationToken);
+
 
     }
 }
